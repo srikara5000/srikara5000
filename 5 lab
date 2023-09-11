@@ -1,0 +1,53 @@
+import heapq
+from collections import Counter
+class Node:
+    def __init__(self, freq, symbol, left=None, right=None):
+        self.freq = freq
+        self.symbol = symbol
+        self.left = left
+        self.right = right
+        self.huff = ''
+     def __lt__(self, other):
+        return self.freq < other.freq
+def encode(string):
+    res = Counter(string)
+    nodes = [Node(freq, char) for char, freq in res.items()]
+    heapq.heapify(nodes)
+    while len(nodes) > 1:
+        left = heapq.heappop(nodes)
+        right = heapq.heappop(nodes)
+        left.huff, right.huff = '0', '1'
+        heapq.heappush(nodes, Node(left.freq + right.freq,
+left.symbol + right.symbol, left, right))
+    return nodes[0] if nodes else None
+def decode(encoded_text, huffman_tree):
+    decoded_text, current_node = "", huffman_tree
+    for bit in encoded_text:
+        current_node = current_node.left if bit == '0' else
+ current_node.right
+        if not current_node.left and not current_node.right:
+            decoded_text += current_node.symbol
+            current_node = huffman_tree
+    return decoded_text
+def print_nodes(node, val=''):
+    if not node:
+
+ return
+    newVal = val + str(node.huff)
+    if not node.left and not node.right:
+        print(f"{node.symbol} -> {newVal}")
+    print_nodes(node.left, newVal)
+    print_nodes(node.right, newVal)
+def main():
+    string = input("Enter the string: ").lower()
+    huffman_tree = encode(string)
+     if not huffman_tree:
+        print("Huffman tree construction failed.")
+        return
+    print("Huffman Codes:")
+    print_nodes(huffman_tree)
+    encoded_text = input("Enter the Huffman-encoded text: ")
+    decoded_text = decode(encoded_text, huffman_tree)
+    print("Decoded Text:", decoded_text)
+if __name__ == "__main__":
+ main()
